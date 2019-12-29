@@ -18,14 +18,9 @@ export class AuthController {
 
     @Post('/signin')
     async signIn(@Body(ValidationPipe) authCredential: AuthCredentialDto) {
-        const username = await this.authService.signIn(authCredential);
-        if (!username) {
-            throw new UnauthorizedException('INVALID_CREDENTIAL');
-        }
-
+        const { accessToken } = await this.authService.signIn(authCredential);
         return {
-            message: 'signin success',
-            username,
+            access_token: accessToken,
         };
     }
 }
