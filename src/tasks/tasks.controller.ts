@@ -15,33 +15,36 @@ export class TasksController {
 
     @Get('/')
     getAllTasks(@Query(ValidationPipe) filterDto: GetTaskDto, @getUser() user: User) {
-        const tasks = this.tasksService.getAllTask(filterDto);
-        console.log(user); // get auth user
+        const tasks = this.tasksService.getAllTask(filterDto, user);
         return tasks;
     }
 
     @Get('/:id')
-    getTaskById(@Param('id', ParseIntPipe) id: number) {
-        const task = this.tasksService.getTaskById(id);
+    getTaskById(@Param('id', ParseIntPipe) id: number, @getUser() user: User) {
+        const task = this.tasksService.getTaskById(id, user);
         return task;
     }
 
     @Post('/')
     @UsePipes(ValidationPipe)
-    createNewTask(@Body() createTaskDto: CreateTaskDto) {
-        const task = this.tasksService.createTask(createTaskDto);
+    createNewTask(@Body() createTaskDto: CreateTaskDto, @getUser() user: User) {
+        const task = this.tasksService.createTask(createTaskDto, user);
         return task;
     }
 
     @Patch('/:id/status')
-    updateTaskStatus(@Param('id', ParseIntPipe) id: number, @Body('status', TaskStatusValidationPipe) status: TaskStatus) {
-        const task = this.tasksService.updateTaskStatus(id, status);
+    updateTaskStatus(
+        @Param('id', ParseIntPipe) id: number,
+        @Body('status', TaskStatusValidationPipe) status: TaskStatus,
+        @getUser() user: User,
+    ) {
+        const task = this.tasksService.updateTaskStatus(id, status, user);
         return task;
     }
 
     @Delete('/:id')
-    deleteTaskById(@Param('id', ParseIntPipe) id: number) {
-        this.tasksService.deleteTaskById(id);
+    async deleteTaskById(@Param('id', ParseIntPipe) id: number, @getUser() user: User) {
+        await this.tasksService.deleteTaskById(id, user);
         return {};
     }
 }

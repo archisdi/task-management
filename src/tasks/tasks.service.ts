@@ -7,6 +7,7 @@ import { GetTaskDto } from './dto/get-task.dto';
 import { TaskRepository } from './task.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './tasks.entity';
+import { User } from '../auth/user.entity';
 
 @Injectable()
 export class TasksService {
@@ -15,17 +16,17 @@ export class TasksService {
         private taskRepo: TaskRepository,
     ) {}
 
-    async getAllTask(filterDto: GetTaskDto) {
-        const allTasks: Task[] = await this.taskRepo.getTasks(filterDto);
+    async getAllTask(filterDto: GetTaskDto, user: User) {
+        const allTasks: Task[] = await this.taskRepo.getTasks(filterDto, user);
         return allTasks;
     }
 
-    async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
-        return this.taskRepo.createTask(createTaskDto);
+    async createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
+        return this.taskRepo.createTask(createTaskDto, user);
     }
 
-    async getTaskById(id: number) {
-        const task = await this.taskRepo.findOne(id);
+    async getTaskById(id: number, user?: User) {
+        const task = await this.taskRepo.findOne({ id, userId: user.id });
         if (!task) {
             throw new NotFoundException('TASK_NOT_FOUND');
         }
@@ -33,17 +34,13 @@ export class TasksService {
         return task;
     }
 
-    async deleteTaskById(id: number): Promise<void> {
-        const task = await this.getTaskById(id);
-        if (!task) {
-            throw new NotFoundException('TASK_NOT_FOUND');
-        }
-
+    async deleteTaskById(id: number, user: User): Promise<void> {
+        const task = await this.getTaskById(id, user);
         await task.remove();
     }
 
-    async updateTaskStatus(id: number, status: TaskStatus): Promise<Task> {
-        const task = await this.getTaskById(id);
+    async updateTaskStatus(id: number, status: TaskStatus, user: User): Promise<Task> {
+        const task = await this.getTaskById(id, user);
         task.status = status;
         task.save();
 
