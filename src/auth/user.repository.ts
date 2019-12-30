@@ -11,7 +11,8 @@ export class UserRepository extends Repository<User> {
             const { username, password } = authCredential;
             const salt = await bcrypt.genSalt();
 
-            const user = new User();
+            // const user = new User();
+            const user = this.create();
 
             user.username = username;
             user.password = await this.hashPassword(password, salt);
